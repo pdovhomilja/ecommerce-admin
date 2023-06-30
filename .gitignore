@@ -28,6 +28,9 @@ yarn-error.log*
 .env*.local
 .env
 
+#MyPersonal notes
+.notes
+
 # vercel
 .vercel
 

@@ -44,8 +44,11 @@ export const StoreModal = () => {
       setLoading(true);
 
       const response = await axios.post("/api/stores", values);
-      toast.success("Store created");
-      //console.log(response.data);
+
+      //Why I do not use redirect from next/navigation? Because I need complete reload of the page. That is the case why I use window.location.assign
+      //There was potentional issue that data in db was not ready yet and I was redirected to the page with 404 error.
+      //So I decided to use window.location.assign to reload the page and get the data from db.
+      window.location.assign(`/${response.data.id}`);
     } catch (error) {
       toast.error("Error creating store");
       //console.log(error);

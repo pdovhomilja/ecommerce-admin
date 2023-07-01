@@ -23,8 +23,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import AlertModal from "@/components/modals/alert-modal";
-import ApiAlert from "@/components/ui/api-alert";
-import { useOrigin } from "@/hooks/use-origin";
 import ImageUpload from "@/components/ui/image-upload";
 
 interface BillboardFormProps {
@@ -41,7 +39,6 @@ type BillboardFormValues = z.infer<typeof formSchema>;
 const BillboardForm = ({ initialData }: BillboardFormProps) => {
   const params = useParams();
   const router = useRouter();
-  const origin = useOrigin();
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,9 +62,17 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
   const onSubmit = async (data: BillboardFormValues) => {
     try {
       setLoading(true);
-      await axios.patch(`/api/stores/${params.storeId}`, data);
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/billboards/${params.billboardId}`,
+          data
+        );
+      } else {
+        await axios.post(`/api/${params.storeId}/billboards`, data);
+      }
       router.refresh();
-      toast.success("Store updated");
+      router.push(`/${params.storeId}/billboards`);
+      toast.success(toastMessage);
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
@@ -80,13 +85,15 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}`);
+      await axios.delete(
+        `/api/${params.storeId}/billboards/${params.billboardId}`
+      );
       router.refresh();
       router.push("/");
-      toast.success("Store deleted");
+      toast.success("Billboard deleted");
     } catch (error) {
       toast.error(
-        "Make sure you have no products and categories in your store"
+        "Make sure you have no categories using this billboard first"
       );
     } finally {
       setLoading(false);
@@ -164,11 +171,6 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
         </form>
       </Form>
       <Separator />
-      {/*   <ApiAlert
-        title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/${params.storeId}`}
-        variant="public"
-      /> */}
     </>
   );
 };
